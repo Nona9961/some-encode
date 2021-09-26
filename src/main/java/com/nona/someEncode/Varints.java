@@ -64,7 +64,7 @@ public class Varints {
     private static void fillVarintWithLong(byte[] result, int i, long l, boolean isLast) {
         for (int j = 0; j <= VARINTS_SIZE; j++) {
             result[i * Byte.SIZE + j] =
-                    (byte) (isLast && j == VARINTS_SIZE ? END : CONTINUE | (((l & FULL_TRUE) >> (j * VARINTS_SIZE)) & BIT7));
+                    (byte) (isLast && j == VARINTS_SIZE ? END : CONTINUE | (((l >> (j * VARINTS_SIZE)) & FULL_TRUE) & BIT7));
         }
     }
 
