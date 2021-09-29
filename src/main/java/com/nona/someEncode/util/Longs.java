@@ -1,4 +1,4 @@
-package com.nona.someEncode;
+package com.nona.someEncode.util;
 
 /**
  * @author nona9961

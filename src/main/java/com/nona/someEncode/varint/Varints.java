@@ -1,4 +1,6 @@
-package com.nona.someEncode;
+package com.nona.someEncode.varint;
+
+import com.nona.someEncode.util.Longs;
 
 import java.util.Arrays;
 

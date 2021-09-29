@@ -1,4 +1,4 @@
-package com.nona.someEncode;
+package com.nona.someEncode.base;
 
 import java.math.BigInteger;
 import java.util.Arrays;
