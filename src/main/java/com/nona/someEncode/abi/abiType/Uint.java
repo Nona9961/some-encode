@@ -21,11 +21,12 @@ public abstract class Uint<T extends Number> extends AbiParamType<T> {
         return Hex.toHexString(bytes);
     }
 
+
     /**
-     * 对数字长度的检查
+     * 检查数字长度并且转为字节数组
      *
      * @param t 数字
-     * @return 是否通过
+     * @return 字节数组
      */
     protected abstract byte[] checkAndTransBytes(T t);
 
