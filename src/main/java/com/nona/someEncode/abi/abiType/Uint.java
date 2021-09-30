@@ -358,7 +358,7 @@ public abstract class Uint<T extends Number> extends AbiParamType<T> {
         protected byte[] checkAndTransBytes(BigInteger value) {
             BigInteger bigInteger = value.shiftRight(MAX_BIT);
             if (bigInteger.compareTo(BigInteger.ZERO) != 0) {
-                throw new IllegalArgumentException("超过Uint80最大值");
+                throw new IllegalArgumentException("超过Uint88最大值");
             }
             return transferByteArray(value, MAX_BIT);
         }
@@ -384,7 +384,7 @@ public abstract class Uint<T extends Number> extends AbiParamType<T> {
         protected byte[] checkAndTransBytes(BigInteger value) {
             BigInteger bigInteger = value.shiftRight(MAX_BIT);
             if (bigInteger.compareTo(BigInteger.ZERO) != 0) {
-                throw new IllegalArgumentException("超过Uint80最大值");
+                throw new IllegalArgumentException("超过Uint96最大值");
             }
             return transferByteArray(value, MAX_BIT);
         }
