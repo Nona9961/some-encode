@@ -21,11 +21,6 @@ public abstract class Uint<T extends Number> extends AbiParamType<T> {
         super(SIZE, value);
     }
 
-    public String abiHex() {
-        byte[] bytes = generateAbi();
-        return Hex.toHexString(bytes);
-    }
-
 
     /**
      * 检查数字长度并且转为字节数组

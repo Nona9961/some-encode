@@ -1,6 +1,7 @@
 package com.nona.someEncode.abi.abiType;
 
 import lombok.Getter;
+import org.bouncycastle.util.encoders.Hex;
 
 /**
  * abi参数类型
@@ -24,5 +25,10 @@ public abstract class AbiParamType<T> {
      * @return 编码数组
      */
     public abstract byte[] generateAbi();
+
+    public String abiHex() {
+        byte[] bytes = generateAbi();
+        return Hex.toHexString(bytes);
+    }
 
 }
