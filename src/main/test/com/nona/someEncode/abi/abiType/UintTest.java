@@ -3,6 +3,9 @@ package com.nona.someEncode.abi.abiType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigInteger;
+import java.util.Arrays;
+
 
 /**
  * @author nona9961
@@ -26,6 +29,19 @@ class UintTest {
         String s2 = uint24.abiHex();
         Assertions.assertEquals("0x00000000000000000000000000000000000000000000000000000000000ffff6", (PREFIX + s2));
 
+        Uint.Uint32 uint32 = new Uint.Uint32(0x99882);
+        String s3 = uint32.abiHex();
+        Assertions.assertEquals("0x0000000000000000000000000000000000000000000000000000000000099882", (PREFIX + s3));
+
+        Uint.Uint72 uint72 = new Uint.Uint72(new BigInteger("1111111111111111111111"));
+        String s4 = uint72.abiHex();
+        System.out.println(s4);
+
+        BigInteger bigInteger = new BigInteger("11111111111111111111111111111111111111111111111111111111111111111111111111111");
+        Uint.Uint256 uint256 = new Uint.Uint256(bigInteger);
+        System.out.println(Arrays.toString(bigInteger.toByteArray()));
+        String s5 = uint256.abiHex();
+        System.out.println(s5);
     }
 
 }
