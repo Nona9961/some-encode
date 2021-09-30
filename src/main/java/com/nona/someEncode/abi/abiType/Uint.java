@@ -30,6 +30,20 @@ public abstract class Uint<T extends Number> extends AbiParamType<T> {
      */
     protected abstract byte[] checkAndTransBytes(T t);
 
+
+    /**
+     * 编码为abi
+     *
+     * @return 字节数组
+     */
+    @Override
+    public byte[] generateAbi() {
+        byte[] valueBytes = checkAndTransBytes(value);
+        byte[] abiByteArr = getEmptyArr();
+        fillRevertBytes(abiByteArr, valueBytes);
+        return abiByteArr;
+    }
+
     /**
      * 因为最大不超过32字节，而abi静态参数类型的编码都要补齐至32字节
      * 所以所有的uint都用一个byte[32]装
@@ -57,6 +71,13 @@ public abstract class Uint<T extends Number> extends AbiParamType<T> {
         }
     }
 
+    /**
+     * 将value的值转为它的字节数组
+     *
+     * @param value  数字
+     * @param maxBit 数字类型对应的最大位
+     * @return 字节数组
+     */
     protected byte[] transferByteArray(Number value, int maxBit) {
         int length = maxBit / Byte.SIZE;
         if (value instanceof Byte || value instanceof Integer || value instanceof Long) {
@@ -117,14 +138,6 @@ public abstract class Uint<T extends Number> extends AbiParamType<T> {
             }
             return transferByteArray(integer, MAX_BIT);
         }
-
-        @Override
-        public byte[] generateAbi() {
-            byte[] abiByteArr = getEmptyArr();
-            byte[] valueBytes = checkAndTransBytes(value);
-            fillRevertBytes(abiByteArr, valueBytes);
-            return abiByteArr;
-        }
     }
 
     public static class Uint24 extends Uint<Integer> {
@@ -142,14 +155,6 @@ public abstract class Uint<T extends Number> extends AbiParamType<T> {
                 throw new IllegalArgumentException("大小超过Uint24最大值");
             }
             return transferByteArray(integer, MAX_BIT);
-        }
-
-        @Override
-        public byte[] generateAbi() {
-            byte[] abiByteArr = getEmptyArr();
-            byte[] valueBytes = checkAndTransBytes(value);
-            fillRevertBytes(abiByteArr, valueBytes);
-            return abiByteArr;
         }
     }
 
@@ -172,14 +177,6 @@ public abstract class Uint<T extends Number> extends AbiParamType<T> {
             int primitive = integer;
             return transferByteArray(integer, MAX_BIT);
         }
-
-        @Override
-        public byte[] generateAbi() {
-            byte[] abiByteArr = getEmptyArr();
-            byte[] valueBytes = checkAndTransBytes(value);
-            fillRevertBytes(abiByteArr, valueBytes);
-            return abiByteArr;
-        }
     }
 
     public static class Uint40 extends Uint<Long> {
@@ -197,14 +194,6 @@ public abstract class Uint<T extends Number> extends AbiParamType<T> {
                 throw new IllegalArgumentException("超过Uint40最大值");
             }
             return transferByteArray(value, MAX_BIT);
-        }
-
-        @Override
-        public byte[] generateAbi() {
-            byte[] abiByteArr = getEmptyArr();
-            byte[] valueBytes = checkAndTransBytes(value);
-            fillRevertBytes(abiByteArr, valueBytes);
-            return abiByteArr;
         }
     }
 
@@ -224,14 +213,6 @@ public abstract class Uint<T extends Number> extends AbiParamType<T> {
             }
             return transferByteArray(value, MAX_BIT);
         }
-
-        @Override
-        public byte[] generateAbi() {
-            byte[] abiByteArr = getEmptyArr();
-            byte[] valueBytes = checkAndTransBytes(value);
-            fillRevertBytes(abiByteArr, valueBytes);
-            return abiByteArr;
-        }
     }
 
     public static class Uint56 extends Uint<Long> {
@@ -249,14 +230,6 @@ public abstract class Uint<T extends Number> extends AbiParamType<T> {
                 throw new IllegalArgumentException("超过Uint56最大值");
             }
             return transferByteArray(value, MAX_BIT);
-        }
-
-        @Override
-        public byte[] generateAbi() {
-            byte[] abiByteArr = getEmptyArr();
-            byte[] valueBytes = checkAndTransBytes(value);
-            fillRevertBytes(abiByteArr, valueBytes);
-            return abiByteArr;
         }
     }
 
@@ -279,14 +252,6 @@ public abstract class Uint<T extends Number> extends AbiParamType<T> {
             long primitive = value;
             return transferByteArray(value, MAX_BIT);
         }
-
-        @Override
-        public byte[] generateAbi() {
-            byte[] abiByteArr = getEmptyArr();
-            byte[] valueBytes = checkAndTransBytes(value);
-            fillRevertBytes(abiByteArr, valueBytes);
-            return abiByteArr;
-        }
     }
 
     public static class Uint72 extends Uint<BigInteger> {
@@ -304,14 +269,6 @@ public abstract class Uint<T extends Number> extends AbiParamType<T> {
                 throw new IllegalArgumentException("超过Uint72最大值");
             }
             return transferByteArray(value, MAX_BIT);
-        }
-
-        @Override
-        public byte[] generateAbi() {
-            byte[] abiByteArr = getEmptyArr();
-            byte[] valueBytes = checkAndTransBytes(value);
-            fillRevertBytes(abiByteArr, valueBytes);
-            return abiByteArr;
         }
     }
 
@@ -331,14 +288,6 @@ public abstract class Uint<T extends Number> extends AbiParamType<T> {
             }
             return transferByteArray(value, MAX_BIT);
         }
-
-        @Override
-        public byte[] generateAbi() {
-            byte[] abiByteArr = getEmptyArr();
-            byte[] valueBytes = checkAndTransBytes(value);
-            fillRevertBytes(abiByteArr, valueBytes);
-            return abiByteArr;
-        }
     }
 
     public static class Uint88 extends Uint<BigInteger> {
@@ -356,14 +305,6 @@ public abstract class Uint<T extends Number> extends AbiParamType<T> {
                 throw new IllegalArgumentException("超过Uint88最大值");
             }
             return transferByteArray(value, MAX_BIT);
-        }
-
-        @Override
-        public byte[] generateAbi() {
-            byte[] abiByteArr = getEmptyArr();
-            byte[] valueBytes = checkAndTransBytes(value);
-            fillRevertBytes(abiByteArr, valueBytes);
-            return abiByteArr;
         }
     }
 
@@ -383,14 +324,6 @@ public abstract class Uint<T extends Number> extends AbiParamType<T> {
             }
             return transferByteArray(value, MAX_BIT);
         }
-
-        @Override
-        public byte[] generateAbi() {
-            byte[] abiByteArr = getEmptyArr();
-            byte[] valueBytes = checkAndTransBytes(value);
-            fillRevertBytes(abiByteArr, valueBytes);
-            return abiByteArr;
-        }
     }
 
     public static class Uint256 extends Uint<BigInteger> {
@@ -408,14 +341,6 @@ public abstract class Uint<T extends Number> extends AbiParamType<T> {
                 throw new IllegalArgumentException("超过Uint256最大值");
             }
             return transferByteArray(value, MAX_BIT);
-        }
-
-        @Override
-        public byte[] generateAbi() {
-            byte[] abiByteArr = getEmptyArr();
-            byte[] valueBytes = checkAndTransBytes(value);
-            fillRevertBytes(abiByteArr, valueBytes);
-            return abiByteArr;
         }
     }
 
