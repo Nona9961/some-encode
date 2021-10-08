@@ -39,7 +39,7 @@ public abstract class Uint<T extends Number> extends AbiParamType<T> {
 
 
     /* ************************************************************************ */
-    /* ****************************  only for subClass *********************** */
+    /* ****************************  only for subClass ************************ */
     /* ************************************************************************ */
 
     @Override
@@ -88,7 +88,9 @@ public abstract class Uint<T extends Number> extends AbiParamType<T> {
         throw new IllegalArgumentException("不支持的数值");
     }
 
-
+    /* ************************************************************************ */
+    /* ****************************  all subClass ***************************** */
+    /* ************************************************************************ */
     public static class Uint8 extends Uint<Byte> {
         public Uint8(Byte value) {
             super(value);
