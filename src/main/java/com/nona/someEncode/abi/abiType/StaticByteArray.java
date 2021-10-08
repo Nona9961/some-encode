@@ -6,8 +6,8 @@ import com.nona.someEncode.util.ByteArrays;
  * @author nona9961
  * @date 2021/10/8 11:35
  */
-public class ByteArray extends AbiParamType<byte[]> {
-    public ByteArray(byte[] value) {
+public class StaticByteArray extends AbiParamType<byte[]> {
+    public StaticByteArray(byte[] value) {
         super(32, value);
     }
 
