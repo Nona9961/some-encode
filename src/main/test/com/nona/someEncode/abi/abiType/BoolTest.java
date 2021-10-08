@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
- * @author hu mingcheng
+ * @author nona9961
  * @date 2021/10/8 11:31
  */
 class BoolTest {

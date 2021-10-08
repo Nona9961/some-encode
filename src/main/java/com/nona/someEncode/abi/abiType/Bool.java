@@ -1,7 +1,7 @@
 package com.nona.someEncode.abi.abiType;
 
 /**
- * @author hu mingcheng
+ * @author nona9961
  * @date 2021/10/8 11:24
  */
 public class Bool extends AbiParamType<Boolean> {

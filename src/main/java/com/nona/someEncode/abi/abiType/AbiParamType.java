@@ -1,8 +1,6 @@
 package com.nona.someEncode.abi.abiType;
 
-import cn.hutool.core.util.ArrayUtil;
 import lombok.Getter;
-import org.bouncycastle.util.encoders.Hex;
 
 /**
  * abi参数类型
@@ -11,7 +9,8 @@ import org.bouncycastle.util.encoders.Hex;
  * @date 2021/9/29 14:47
  */
 @Getter
-public abstract class AbiParamType<T> {
+public abstract class AbiParamType<T> implements AbiType<T> {
+    public static final int FIXED_LENGTH = 32;
     protected int length;
     protected T value;
 
@@ -28,36 +27,10 @@ public abstract class AbiParamType<T> {
      * @param value  传入的value
      * @return 修改后的value
      */
-    protected abstract T regularValue(int length, T value);
-
-    /**
-     * 将value转为abi编码
-     *
-     * @return 编码数组
-     */
-    public abstract byte[] generateAbi();
-
-    public String abiHex() {
-        byte[] bytes = generateAbi();
-        return Hex.toHexString(bytes);
+    protected T regularValue(int length, T value) {
+        return value;
     }
 
-    /**
-     * 将fillArray倒叙填充进original中
-     * eg:
-     * {1,2}填充{0,0,0,0}为{0,0,1,2}
-     *
-     * @param original  待填充数组
-     * @param fillArray 填充数组
-     */
-    protected void fillRevertBytes(byte[] original, byte[] fillArray) {
-        if (ArrayUtil.isEmpty(original) || ArrayUtil.isEmpty(fillArray)) {
-            return;
-        }
-        for (int i = fillArray.length - 1, j = original.length - 1; i >= 0; i--, j--) {
-            original[j] = fillArray[i];
-        }
-    }
 
     /**
      * 因为最大不超过32字节，而abi静态参数类型的编码都要补齐至32字节

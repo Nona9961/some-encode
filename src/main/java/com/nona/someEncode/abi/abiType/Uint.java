@@ -1,5 +1,7 @@
 package com.nona.someEncode.abi.abiType;
 
+import com.nona.someEncode.util.ByteArrays;
+
 import java.math.BigInteger;
 import java.util.Arrays;
 
@@ -33,7 +35,7 @@ public abstract class Uint<T extends Number> extends AbiParamType<T> {
     public byte[] generateAbi() {
         byte[] valueBytes = transferByteArray(value);
         byte[] abiByteArr = getEmptyArr();
-        fillRevertBytes(abiByteArr, valueBytes);
+        ByteArrays.fillRevertBytes(abiByteArr, valueBytes);
         return abiByteArr;
     }
 

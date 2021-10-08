@@ -3,10 +3,8 @@ package com.nona.someEncode.abi.abiType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-
 /**
- * @author hu mingcheng
+ * @author nona9961
  * @date 2021/10/8 11:38
  */
 class ByteArrayTest {
@@ -17,9 +15,10 @@ class ByteArrayTest {
 
     @Test
     void testAbi() {
-        byte[] bytes = {1, 5, 9, 8, 7, 4, 63, 5, 8, 9, 3, 1, 8, 32, 96, 2, 21, 5, 7};
-        ByteArray byteArray = new ByteArray(bytes);
+        String rawString = "1234567890";
+        byte[] rawStringBytes = rawString.getBytes();
+        ByteArray byteArray = new ByteArray(rawStringBytes);
         String s = byteArray.abiHex();
-        Assertions.assertEquals("000000000000000000000000000105090807043f050809030108206002150507", s);
+        Assertions.assertEquals("3132333435363738393000000000000000000000000000000000000000000000", s);
     }
 }

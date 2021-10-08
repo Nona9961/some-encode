@@ -1,6 +1,7 @@
 package com.nona.someEncode.abi.abiType;
 
 import cn.hutool.core.util.StrUtil;
+import com.nona.someEncode.util.ByteArrays;
 import org.bouncycastle.util.encoders.Hex;
 
 /**
@@ -34,7 +35,7 @@ public class Address extends AbiParamType<String> {
     public byte[] generateAbi() {
         byte[] bytes = Hex.decode(value);
         byte[] abiBytes = getEmptyArr();
-        fillRevertBytes(abiBytes, bytes);
+        ByteArrays.fillRevertBytes(abiBytes, bytes);
         return abiBytes;
     }
 }

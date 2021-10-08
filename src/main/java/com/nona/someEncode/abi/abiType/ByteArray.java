@@ -1,7 +1,9 @@
 package com.nona.someEncode.abi.abiType;
 
+import com.nona.someEncode.util.ByteArrays;
+
 /**
- * @author hu mingcheng
+ * @author nona9961
  * @date 2021/10/8 11:35
  */
 public class ByteArray extends AbiParamType<byte[]> {
@@ -20,7 +22,7 @@ public class ByteArray extends AbiParamType<byte[]> {
     @Override
     public byte[] generateAbi() {
         byte[] abiArray = getEmptyArr();
-        fillRevertBytes(abiArray, value);
+        ByteArrays.fillBytes(abiArray, value);
         return abiArray;
     }
 }
