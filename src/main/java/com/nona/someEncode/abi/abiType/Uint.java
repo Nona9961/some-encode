@@ -1,7 +1,5 @@
 package com.nona.someEncode.abi.abiType;
 
-import cn.hutool.core.util.ArrayUtil;
-
 import java.math.BigInteger;
 import java.util.Arrays;
 
@@ -45,7 +43,7 @@ public abstract class Uint<T extends Number> extends AbiParamType<T> {
     /* ************************************************************************ */
 
     @Override
-    protected T regularValue(T value) {
+    protected T regularValue(int length, T value) {
         if (value instanceof BigInteger) {
             BigInteger bigInteger = ((BigInteger) value).shiftRight(getMaxBit());
             if (bigInteger.compareTo(BigInteger.ZERO) != 0) {
@@ -61,16 +59,6 @@ public abstract class Uint<T extends Number> extends AbiParamType<T> {
             return value;
         }
         throw new UnsupportedOperationException("不支持的数值");
-    }
-
-    /**
-     * 因为最大不超过32字节，而abi静态参数类型的编码都要补齐至32字节
-     * 所以所有的uint都用一个byte[32]装
-     *
-     * @return 32字节的零数组
-     */
-    protected byte[] getEmptyArr() {
-        return new byte[length];
     }
 
     /**

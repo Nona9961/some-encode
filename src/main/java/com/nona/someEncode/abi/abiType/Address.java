@@ -16,7 +16,7 @@ public class Address extends AbiParamType<String> {
     }
 
     @Override
-    protected String regularValue(String value) {
+    protected String regularValue(int length, String value) {
         if (StrUtil.isBlank(value)) {
             throw new IllegalArgumentException("未传入地址");
         }
@@ -30,14 +30,10 @@ public class Address extends AbiParamType<String> {
         return realAddress;
     }
 
-    public byte[] getEmptyBytes() {
-        return new byte[length];
-    }
-
     @Override
     public byte[] generateAbi() {
         byte[] bytes = Hex.decode(value);
-        byte[] abiBytes = getEmptyBytes();
+        byte[] abiBytes = getEmptyArr();
         fillRevertBytes(abiBytes, bytes);
         return abiBytes;
     }
