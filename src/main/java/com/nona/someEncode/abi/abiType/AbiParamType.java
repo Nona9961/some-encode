@@ -1,5 +1,6 @@
 package com.nona.someEncode.abi.abiType;
 
+import cn.hutool.core.util.ArrayUtil;
 import lombok.Getter;
 import org.bouncycastle.util.encoders.Hex;
 
@@ -15,9 +16,18 @@ public abstract class AbiParamType<T> {
     protected T value;
 
     public AbiParamType(int length, T value) {
+        T checkedValue = regularValue(value);
         this.length = length;
-        this.value = value;
+        this.value = checkedValue;
     }
+
+    /**
+     * 用于对value规范或者修改
+     *
+     * @param value 传入的值
+     * @return 修改后的值
+     */
+    protected abstract T regularValue(T value);
 
     /**
      * 将value转为abi编码
@@ -29,6 +39,23 @@ public abstract class AbiParamType<T> {
     public String abiHex() {
         byte[] bytes = generateAbi();
         return Hex.toHexString(bytes);
+    }
+
+    /**
+     * 将fillArray倒叙填充进original中
+     * eg:
+     * {1,2}填充{0,0,0,0}为{0,0,1,2}
+     *
+     * @param original  待填充数组
+     * @param fillArray 填充数组
+     */
+    protected void fillRevertBytes(byte[] original, byte[] fillArray) {
+        if (ArrayUtil.isEmpty(original) || ArrayUtil.isEmpty(fillArray)) {
+            return;
+        }
+        for (int i = fillArray.length - 1, j = original.length - 1; i >= 0; i--, j--) {
+            original[j] = fillArray[i];
+        }
     }
 
 }

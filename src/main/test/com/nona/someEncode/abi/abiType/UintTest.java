@@ -15,6 +15,12 @@ class UintTest {
 
     private final String PREFIX = "0x";
 
+
+    @Test
+    void testInit() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> new Uint.Uint16(0x1FFFF));
+    }
+
     @Test
     void testUint() {
         Uint.Uint8 uint8 = new Uint.Uint8((byte) 1);
