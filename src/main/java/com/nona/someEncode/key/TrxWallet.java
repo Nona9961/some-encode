@@ -1,14 +1,10 @@
 package com.nona.someEncode.key;
 
 import com.nona.someEncode.base.Base58;
-import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPrivateKey;
-import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey;
+import com.nona.someEncode.crypto.SECP256K1Support;
 import org.bouncycastle.jcajce.provider.digest.Keccak;
 import org.bouncycastle.jcajce.provider.digest.SHA256;
 import org.bouncycastle.util.encoders.Hex;
-
-import java.math.BigInteger;
-import java.security.KeyPair;
 
 /**
  * trx公私钥和地址的类
@@ -16,24 +12,13 @@ import java.security.KeyPair;
  * @author nona9961
  * @date 2021/8/25 11:42
  */
-public class TrxKey {
+public class TrxWallet extends SECP256K1KeyWallet {
 
-    private final static int PRI_LENGTH = 32;
-    private final static int PUB_LENGTH = 64;
     private final static byte ADDRESS_PREFIX = 0x41;
 
 
-    private final byte[] pri;
-    private final byte[] pub;
-
-    public TrxKey() {
-        KeyPair keyPair = SECP256K1KeyPair.generateKeyPair();
-        BCECPrivateKey privateKey = (BCECPrivateKey) keyPair.getPrivate();
-        this.pri = normalizePrivateKey(privateKey.getD());
-        BCECPublicKey publicKey = (BCECPublicKey) keyPair.getPublic();
-        byte[] q = publicKey.getQ().getEncoded(false);
-        this.pub = normalizePublicKey(q);
-    }
+    private String privateKey;
+    private String address;
 
     /**
      * 根据十六进制私钥字符串生成对应的地址
@@ -42,8 +27,8 @@ public class TrxKey {
      * @return 对应的Address
      */
     public static String addressFromPrivateKey(String hexPrivateStr) {
-        byte[] pubFromPrivate = SECP256K1KeyPair.getPubFromPrivate(hexPrivateStr);
-        byte[] pub = normalizePublicKey(pubFromPrivate);
+        byte[] pubFromPrivate = SECP256K1Support.getPubUncompressedFromPrivate(hexPrivateStr);
+        byte[] pub = removeThePrefixOfThePublicKey(pubFromPrivate);
         byte[] raw = hashForAddress(pub);
         byte[] addressAndCheck = baseCheck(raw);
         return Base58.encode(addressAndCheck);
@@ -86,9 +71,13 @@ public class TrxKey {
      * @return base58格式的address
      */
     public String getAddress() {
+        if (null != this.address) {
+            return this.address;
+        }
         byte[] raw = hashForAddress(this.pub);
         byte[] addressAndCheck = baseCheck(raw);
-        return Base58.encode(addressAndCheck);
+        this.address = Base58.encode(addressAndCheck);
+        return this.address;
     }
 
     /**
@@ -97,7 +86,11 @@ public class TrxKey {
      * @return 私钥(16进制)
      */
     public String getPrivateHex() {
-        return Hex.toHexString(this.pri);
+        if (this.privateKey != null) {
+            return this.privateKey;
+        }
+        this.privateKey = Hex.toHexString(this.pri);
+        return this.privateKey;
     }
 
 
@@ -142,21 +135,15 @@ public class TrxKey {
         return addressAndCheck;
     }
 
-
     /**
-     * 生成私钥的bigInteger可能有33byte，第一个是0x00，是符号占位直接去掉
+     * 直接看{@link #removeThePrefixOfThePublicKey(byte[])}
      *
-     * @param d private key in bigInteger form
-     * @return private key in byte array form
+     * @param pubByteWithPrefix public key with 0x04
+     * @return public key removed 0x04
      */
-    private static byte[] normalizePrivateKey(BigInteger d) {
-        byte[] rawBytes = d.toByteArray();
-        if (rawBytes.length == 32) {
-            return rawBytes;
-        }
-        byte[] pri = new byte[PRI_LENGTH];
-        System.arraycopy(rawBytes, 1, pri, 0, PRI_LENGTH);
-        return pri;
+    @Override
+    protected byte[] normalizePublicKey(byte[] pubByteWithPrefix) {
+        return removeThePrefixOfThePublicKey(pubByteWithPrefix);
     }
 
     /**
@@ -165,10 +152,9 @@ public class TrxKey {
      * @param pubByteWithPrefix public key with 0x04
      * @return public key removed 0x04
      */
-    private static byte[] normalizePublicKey(byte[] pubByteWithPrefix) {
+    private static byte[] removeThePrefixOfThePublicKey(byte[] pubByteWithPrefix) {
         byte[] pubWithoutPrefix = new byte[PUB_LENGTH];
         System.arraycopy(pubByteWithPrefix, 1, pubWithoutPrefix, 0, PUB_LENGTH);
         return pubWithoutPrefix;
     }
-
 }

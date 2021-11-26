@@ -1,4 +1,4 @@
-package com.nona.someEncode.key;
+package com.nona.someEncode.crypto;
 
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
@@ -24,7 +24,7 @@ import java.security.spec.ECGenParameterSpec;
 import java.util.Arrays;
 
 /**
- * 用于生成secp256k1的公私钥,只做和SECP256K1公私钥相关的事情
+ * 用于生成secp256k1的公私钥和签名,只做和SECP256K1相关的事情
  * <p>
  * 保存着椭圆图形信息，支持从私钥导出公钥
  *
@@ -32,15 +32,15 @@ import java.util.Arrays;
  * @date 2021/8/25 11:57
  */
 @Log4j2
-public class SECP256K1KeyPair {
+public class SECP256K1Support {
 
     private static final String ALGORITHM = "ECDSA";
     private static final String PROVIDER = "BC";
     private static final String CURVE_NAME = "secp256k1";
     private static final String HEX_PREFIX = "0x";
     private static final int HEX_PRIVATE_KEY_LENGTH = 64;
-    private static final BigInteger HALF_N;
 
+    private static final BigInteger HALF_N;
     private static KeyPairGenerator keyPairGenerator;
     private static X9ECParameters curve;
     private static ECDomainParameters ecDomainParameters;
@@ -52,38 +52,44 @@ public class SECP256K1KeyPair {
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(ALGORITHM, PROVIDER);
             ECGenParameterSpec ecGenParameterSpec = new ECGenParameterSpec(CURVE_NAME);
             keyPairGenerator.initialize(ecGenParameterSpec);
-            SECP256K1KeyPair.keyPairGenerator = keyPairGenerator;
-            curve = SECNamedCurves.getByName(CURVE_NAME);
-            ecDomainParameters = new ECDomainParameters(curve.getCurve(), curve.getG(), curve.getN(), curve.getH());
+            SECP256K1Support.keyPairGenerator = keyPairGenerator;
+            SECP256K1Support.curve = SECNamedCurves.getByName(CURVE_NAME);
+            SECP256K1Support.ecDomainParameters = new ECDomainParameters(curve.getCurve(), curve.getG(), curve.getN(), curve.getH());
             HALF_N = curve.getN().shiftRight(1);
         } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
             log.error(e.getMessage(), e);
-            throw new RuntimeException("init SECP256K1Helper failed,the reason is: " + e.getMessage());
+            throw new RuntimeException("init SECP256K1Support failed,the reason is: " + e.getMessage());
         }
     }
 
+    /**
+     * 提供公私钥对
+     *
+     * @return 公私钥对
+     */
+    public static KeyPair generateKeyPair() {
+        return keyPairGenerator.generateKeyPair();
+    }
 
     /**
-     * trx的签名
-     * <p>
-     * 与一般ECDSA签名不同的是，trx除了r，s还有v
+     * 基于secp256k1的签名方法，用sha256签
      *
-     * @param signData 待签名的数据
-     * @param pk       私钥
-     * @return 签名（十六进制字符串）
+     * @param signData 待签名数据
+     * @param hexPk    私钥——16进制字符串
+     * @return 签名——16进制字符串
      */
-    public static String trxSign(byte[] signData, String pk) {
-        if (ArrayUtil.isEmpty(signData) || StrUtil.isBlank(pk)) {
+    public static String sign(byte[] signData, String hexPk) {
+        if (ArrayUtil.isEmpty(signData) || StrUtil.isBlank(hexPk)) {
             throw new IllegalArgumentException("sign data or private key is empty");
         }
-        hexPkLengthCheck(pk);
-        BigInteger pkInteger = new BigInteger(1, Hex.decode(pk));
+        hexPkLengthCheck(hexPk);
+        BigInteger pkInteger = new BigInteger(1, Hex.decode(hexPk));
         ECDSASigner signer = new ECDSASigner(new HMacDSAKCalculator(new SHA256Digest()));
         ECPrivateKeyParameters ecPrivateKeyParameters = new ECPrivateKeyParameters(pkInteger, ecDomainParameters);
         signer.init(true, ecPrivateKeyParameters);
         BigInteger[] components = signer.generateSignature(signData);
         components[1] = regularize(components[1]);
-        byte v = getV(pk, components, signData);
+        byte v = getV(hexPk, components, signData);
         byte[] sign = new byte[65];
         System.arraycopy(modifySignComp(components[0]), 0, sign, 0, 32);
         System.arraycopy(modifySignComp(components[1]), 0, sign, 32, 32);
@@ -92,32 +98,54 @@ public class SECP256K1KeyPair {
     }
 
     /**
-     * @return keyPair
+     * 从私钥中提出未被压缩的公钥
+     * <p>
+     * 要被压缩过的公钥请看{@link #getPubCompressedFromPrivate(String)}
+     *
+     * @param hexPrivateStr 私钥——16进制字符串
+     * @return 公钥——byte数组
      */
-    public static KeyPair generateKeyPair() {
-        return keyPairGenerator.generateKeyPair();
+    public static byte[] getPubUncompressedFromPrivate(String hexPrivateStr) {
+        hexPkLengthCheck(hexPrivateStr);
+        final ECPoint point = getPubPoint(hexPrivateStr);
+        return point.getEncoded(false);
     }
 
     /**
-     * @param hexPrivateStr
-     * @return
+     * 从私钥中提出被压缩的公钥
+     * <p>
+     * 要没有被压缩过的公钥请看{@link #getPubUncompressedFromPrivate(String)}
+     *
+     * @param hexPrivateStr 私钥——16进制字符串
+     * @return 公钥——byte数组
      */
-    public static byte[] getPubFromPrivate(String hexPrivateStr) {
+    public static byte[] getPubCompressedFromPrivate(String hexPrivateStr) {
         hexPkLengthCheck(hexPrivateStr);
+        final ECPoint point = getPubPoint(hexPrivateStr);
+        return point.getEncoded(true);
+    }
+
+
+    /*================================== private method ===============================================*/
+
+    /**
+     * 从私钥中找到公钥对应的几何点
+     *
+     * @param hexPrivateStr 私钥——16进制字符串
+     * @return 公钥对应的几何点
+     */
+    private static ECPoint getPubPoint(String hexPrivateStr) {
         BigInteger privateValue = new BigInteger(hexPrivateStr, 16);
 
         if (privateValue.bitLength() > curve.getN().bitLength()) {
             privateValue = privateValue.mod(curve.getN());
         }
         // K = kG
-        final ECPoint point = new FixedPointCombMultiplier().multiply(curve.getG(), privateValue);
-        return point.getEncoded(false);
+        return new FixedPointCombMultiplier().multiply(curve.getG(), privateValue);
     }
-    /*================================== private method ===============================================*/
-
 
     /**
-     * 该biginteger应该有32byte，但有可能存在第33byte表征符号，去掉
+     * 该BigInteger应该有32byte，但有可能存在表征符号，去掉
      * <p>
      *
      * @param bigInteger biginteger
@@ -162,7 +190,6 @@ public class SECP256K1KeyPair {
         return s;
     }
 
-
     /**
      * 通过签名和原始数据找到trx签名中的v
      *
@@ -172,7 +199,7 @@ public class SECP256K1KeyPair {
      * @return v
      */
     private static byte getV(String pk, BigInteger[] component, byte[] signData) {
-        byte[] pubFromPrivate = getPubFromPrivate(pk);
+        byte[] pubFromPrivate = getPubUncompressedFromPrivate(pk);
         int retryTimes = 0;
         for (int i = 0; i < 4; i++) {
             byte[] pubNew = resolvePubFromSign(i, component, signData);
